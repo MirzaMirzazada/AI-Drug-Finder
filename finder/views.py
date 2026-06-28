@@ -3,11 +3,7 @@ import pandas as pd
 import os
 from PIL import Image
 import pytesseract
-from dotenv import load_dotenv
-import google.generativeai as genai
-
-
-load_dotenv()
+import ollama
 
 
 def load_medicines():
@@ -43,70 +39,110 @@ def search_medicines(query):
     return results[:6]
 
 
-def ask_gemini(question):
-    api_key = os.getenv("GEMINI_API_KEY")
-
-    if not api_key:
-        return "Gemini API key is missing. Add GEMINI_API_KEY to your .env file."
-
+def ask_local_ai(question):
     try:
-        genai.configure(api_key=api_key)
+        medicines = load_medicines()
 
-        model = genai.GenerativeModel("gemini-2.5-flash")
+        medicine_context = ""
+        for _, row in medicines.iterrows():
+            medicine_context += (
+                f"Medicine name: {row['name']}\n"
+                f"Used for: {row['usage']}\n"
+                f"Color: {row['color']}\n"
+                f"Form: {row['form']}\n\n"
+            )
 
-        prompt = f"""
+        response = ollama.chat(
+            model="llama3.2",
+            messages=[
+                {
+                    "role": "system",
+                    "content": f"""
 You are a Pharmacist AI Assistant for a student project.
 
-Rules:
-- Give general educational medicine information.
+IMPORTANT:
+- The user asks about medicines and pharmacy.
+- If the user says Parol, Panadol, Majezik, Nurofen, Dolorex, Augmentin, Vitamin D, Aspirin, Calpol, or Rennie, treat it as a medicine.
+- Do not answer with law, contracts, politics, or unrelated meanings.
+- Use the medicine database below when possible.
+- Give short and simple answers.
 - Do not diagnose disease.
 - Do not prescribe treatment.
-- Do not give exact dosage instructions.
-- Always remind that final decision belongs to pharmacist or doctor.
-- Keep the answer simple and short.
+- Do not give exact dosage.
+- Always say the pharmacist or doctor must make the final decision.
 
-User question:
-{question}
+Medicine database:
+{medicine_context}
 """
+                },
+                {
+                    "role": "user",
+                    "content": question
+                }
+            ]
+        )
 
-        response = model.generate_content(prompt)
-
-        return response.text
+        return response["message"]["content"]
 
     except Exception as e:
-        return f"AI error: {str(e)}"
-
+        return f"Ollama AI error: {str(e)}"
 
 def home(request):
+
     drug_results = []
     prescription_results = []
     extracted_text = ""
     ai_answer = ""
 
+    # Which page should stay open after refresh
+    active_tab = "dashboard"
+
     if request.method == "POST":
 
+        # --------------------------
+        # Drug Finder
+        # --------------------------
         if "find_drug" in request.POST:
+
+            active_tab = "drug"
+
             description = request.POST.get("description", "")
             drug_results = search_medicines(description)
 
-        if "read_prescription" in request.POST:
+        # --------------------------
+        # Prescription Reader
+        # --------------------------
+        elif "read_prescription" in request.POST:
+
+            active_tab = "prescription"
+
             image_file = request.FILES.get("prescription")
 
             if image_file:
                 try:
                     image = Image.open(image_file)
                     extracted_text = pytesseract.image_to_string(image)
-                    prescription_results = search_medicines(extracted_text)
-                except Exception:
-                    extracted_text = "OCR is not ready yet. We will add Tesseract OCR later."
 
-        if "ask_ai" in request.POST:
+                    prescription_results = search_medicines(extracted_text)
+
+                except Exception:
+                    extracted_text = "OCR is not ready yet."
+
+        # --------------------------
+        # Pharmacist AI
+        # --------------------------
+        elif "ask_ai" in request.POST:
+
+            active_tab = "chat"
+
             question = request.POST.get("ai_question", "")
-            ai_answer = ask_gemini(question)
+
+            ai_answer = ask_local_ai(question)
 
     return render(request, "finder/home.html", {
         "drug_results": drug_results,
         "prescription_results": prescription_results,
         "extracted_text": extracted_text,
-        "ai_answer": ai_answer
+        "ai_answer": ai_answer,
+        "active_tab": active_tab,
     })

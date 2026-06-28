@@ -284,26 +284,37 @@
 </div>
 
 <script>
+
 function showSection(sectionId) {
-    const sections = document.querySelectorAll('.section');
-    const navs = document.querySelectorAll('.nav');
 
+    const sections = document.querySelectorAll(".section");
     sections.forEach(section => {
-        section.classList.remove('active-section');
+        section.classList.remove("active-section");
     });
 
-    document.getElementById(sectionId).classList.add('active-section');
-
+    const navs = document.querySelectorAll(".nav");
     navs.forEach(nav => {
-        nav.classList.remove('active');
+        nav.classList.remove("active");
     });
 
-    if (sectionId === 'dashboard') navs[0].classList.add('active');
-    if (sectionId === 'drug') navs[1].classList.add('active');
-    if (sectionId === 'prescription') navs[2].classList.add('active');
-    if (sectionId === 'chat') navs[3].classList.add('active');
-    if (sectionId === 'history') navs[4].classList.add('active');
+    document.getElementById(sectionId).classList.add("active-section");
+
+    if(sectionId=="dashboard") navs[0].classList.add("active");
+    if(sectionId=="drug") navs[1].classList.add("active");
+    if(sectionId=="prescription") navs[2].classList.add("active");
+    if(sectionId=="chat") navs[3].classList.add("active");
+    if(sectionId=="history") navs[4].classList.add("active");
+
 }
+
+
+// Automatically open the correct page after Django refreshes
+window.onload = function(){
+
+    showSection("{{ active_tab|default:'dashboard' }}");
+
+}
+
 </script>
 
 </body>
