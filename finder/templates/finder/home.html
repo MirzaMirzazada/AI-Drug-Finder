@@ -1,0 +1,310 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>PharmAssist AI</title>
+    <link rel="stylesheet" href="{% static 'finder/style.css' %}">
+</head>
+<body>
+
+<div class="app">
+
+    <aside class="sidebar">
+        <div class="brand">
+            <div class="cross">✚</div>
+            <div>
+                <h2>PharmAssist <span>AI</span></h2>
+                <p>Your AI Pharmacy Assistant</p>
+            </div>
+        </div>
+
+        <button class="nav active" onclick="showSection('dashboard')">⌂ Dashboard</button>
+        <button class="nav" onclick="showSection('drug')">⌕ Drug Finder</button>
+        <button class="nav" onclick="showSection('prescription')">▣ Prescription Reader</button>
+        <button class="nav" onclick="showSection('chat')">☷ Pharmacist AI</button>
+        <button class="nav" onclick="showSection('history')">◷ History</button>
+
+        <div class="premium">
+            <h3>◇ Premium Features</h3>
+            <p>Unlock advanced AI pharmacy tools.</p>
+            <button>Upgrade Now →</button>
+        </div>
+
+        <div class="profile">
+            <div class="avatar">●</div>
+            <div>
+                <b>Pharmacist</b>
+                <p>Pro Plan</p>
+            </div>
+        </div>
+    </aside>
+
+    <main class="main">
+
+        <header class="topbar">
+            <div>
+                <h1>Welcome back, Pharmacist 👋</h1>
+                <p>How can AI assist you today?</p>
+            </div>
+
+            <div class="top-actions">
+                <input placeholder="Search medicines, symptoms...">
+                <button>⌕</button>
+                <button>☾</button>
+            </div>
+        </header>
+
+        <section id="dashboard" class="section active-section">
+
+            <div class="cards">
+
+                <div class="feature-card green" onclick="showSection('drug')">
+                    <div class="num">01</div>
+                    <div class="icon glow-green">💊</div>
+                    <h2>DRUG FINDER</h2>
+                    <p>Find medicines by description</p>
+
+                    <ul>
+                        <li>Describe the medicine</li>
+                        <li>AI suggests possible matches</li>
+                        <li>View details and images</li>
+                    </ul>
+
+                    <button>Start Searching →</button>
+                </div>
+
+                <div class="feature-card green" onclick="showSection('prescription')">
+                    <div class="num">02</div>
+                    <div class="icon glow-green">📷</div>
+                    <h2>PRESCRIPTION READER</h2>
+                    <p>Upload or capture prescription</p>
+
+                    <ul>
+                        <li>Upload or take a photo</li>
+                        <li>AI reads the handwriting</li>
+                        <li>Find possible medicines</li>
+                    </ul>
+
+                    <button>Upload Prescription →</button>
+                </div>
+
+                <div class="feature-card red" onclick="showSection('chat')">
+                    <div class="num red-text">03</div>
+                    <div class="icon glow-red">💬</div>
+                    <h2>PHARMACIST AI</h2>
+                    <p>Ask anything about medicines</p>
+
+                    <ul>
+                        <li>Get info about medicines</li>
+                        <li>Uses AI for answers</li>
+                        <li>Fast and simple support</li>
+                    </ul>
+
+                    <button class="red-btn">Start Chatting →</button>
+                </div>
+
+            </div>
+
+            <div class="bottom-grid">
+
+                <div class="panel">
+                    <div class="panel-head">
+                        <h3>RECENT HISTORY</h3>
+                        <button onclick="showSection('history')">View All →</button>
+                    </div>
+
+                    <div class="history-row">
+                        <span class="mini green-bg">⌕</span>
+                        <p>red headache medicine</p>
+                        <b>Drug Finder</b>
+                        <small>2 minutes ago</small>
+                        <span>›</span>
+                    </div>
+
+                    <div class="history-row">
+                        <span class="mini dark-bg">▣</span>
+                        <p>Prescription image uploaded</p>
+                        <b>Prescription Reader</b>
+                        <small>15 minutes ago</small>
+                        <span>›</span>
+                    </div>
+
+                    <div class="history-row">
+                        <span class="mini red-bg">☷</span>
+                        <p>What is Parol used for?</p>
+                        <b class="red-label">Pharmacist AI</b>
+                        <small>1 hour ago</small>
+                        <span>›</span>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="panel tip">
+                        <h3>💡 PHARMACY TIP</h3>
+                        <p>“Always verify medicine details before recommending to customers. When in doubt, consult a doctor.”</p>
+                    </div>
+
+                    <div class="panel stats">
+                        <h3>QUICK STATS</h3>
+                        <div class="stats-grid">
+                            <div><b>128</b><span>Searches</span></div>
+                            <div><b>42</b><span>Prescriptions</span></div>
+                            <div><b>67</b><span>AI Chats</span></div>
+                            <div><b>9</b><span>Favorites</span></div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </section>
+
+        <section id="drug" class="section">
+            <div class="module-card">
+                <h2>Drug Finder</h2>
+                <p>Write what the customer remembers about the medicine.</p>
+
+                <form method="POST">
+                    {% csrf_token %}
+                    <textarea name="description" placeholder="Example: red headache medicine, small white pill, stomach pain tablet..."></textarea>
+                    <button type="submit" name="find_drug">Find Medicine →</button>
+                </form>
+            </div>
+        </section>
+
+        <section id="prescription" class="section">
+            <div class="module-card">
+                <h2>Prescription Reader</h2>
+                <p>Upload or take a photo of doctor handwriting.</p>
+
+                <form method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <input type="file" name="prescription" accept="image/*" capture="environment">
+                    <button type="submit" name="read_prescription">Read Prescription →</button>
+                </form>
+
+                {% if extracted_text %}
+                    <div class="answer-box">
+                        <b>AI/OCR sees:</b><br>
+                        {{ extracted_text }}
+                    </div>
+                {% endif %}
+            </div>
+        </section>
+
+        <section id="chat" class="section">
+            <div class="module-card red-border">
+                <h2>Pharmacist AI</h2>
+                <p>Ask medicine information questions.</p>
+
+                <form method="POST">
+                    {% csrf_token %}
+                    <textarea name="ai_question" placeholder="Example: What is Parol used for? Which company created Augmentin?"></textarea>
+                    <button class="red-btn" type="submit" name="ask_ai">Ask AI →</button>
+                </form>
+
+                {% if ai_answer %}
+                    <div class="answer-box red-left">
+                        {{ ai_answer }}
+                    </div>
+                {% endif %}
+            </div>
+        </section>
+
+        <section id="history" class="section">
+            <div class="module-card">
+                <h2>History</h2>
+                <p>Your recent pharmacy assistant actions.</p>
+
+                <div class="history-row big">
+                    <span class="mini green-bg">⌕</span>
+                    <p>red headache medicine</p>
+                    <b>Drug Finder</b>
+                    <small>2 minutes ago</small>
+                </div>
+
+                <div class="history-row big">
+                    <span class="mini dark-bg">▣</span>
+                    <p>Prescription image uploaded</p>
+                    <b>Prescription Reader</b>
+                    <small>15 minutes ago</small>
+                </div>
+
+                <div class="history-row big">
+                    <span class="mini red-bg">☷</span>
+                    <p>What is Parol used for?</p>
+                    <b class="red-label">Pharmacist AI</b>
+                    <small>1 hour ago</small>
+                </div>
+            </div>
+        </section>
+
+        {% if drug_results %}
+        <section class="results">
+            <h2>Suggested Medicines</h2>
+            <div class="result-grid">
+                {% for drug in drug_results %}
+                <div class="medicine-card">
+                    <img src="{% static 'finder/images/' %}{{ drug.image }}">
+                    <h3>{{ drug.name }}</h3>
+                    <p>Usage: {{ drug.usage }}</p>
+                    <p>Color: {{ drug.color }}</p>
+                    <p>Form: {{ drug.form }}</p>
+                    <span>Score: {{ drug.score }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+
+        {% if prescription_results %}
+        <section class="results">
+            <h2>Medicines Found From Prescription</h2>
+            <div class="result-grid">
+                {% for drug in prescription_results %}
+                <div class="medicine-card">
+                    <img src="{% static 'finder/images/' %}{{ drug.image }}">
+                    <h3>{{ drug.name }}</h3>
+                    <p>Usage: {{ drug.usage }}</p>
+                    <p>Color: {{ drug.color }}</p>
+                    <p>Form: {{ drug.form }}</p>
+                    <span>Score: {{ drug.score }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+
+        <div class="warning">
+            Important: This system gives suggestions only. Final decision always belongs to the pharmacist.
+        </div>
+
+    </main>
+
+</div>
+
+<script>
+function showSection(sectionId) {
+    const sections = document.querySelectorAll('.section');
+    const navs = document.querySelectorAll('.nav');
+
+    sections.forEach(section => {
+        section.classList.remove('active-section');
+    });
+
+    document.getElementById(sectionId).classList.add('active-section');
+
+    navs.forEach(nav => {
+        nav.classList.remove('active');
+    });
+
+    if (sectionId === 'dashboard') navs[0].classList.add('active');
+    if (sectionId === 'drug') navs[1].classList.add('active');
+    if (sectionId === 'prescription') navs[2].classList.add('active');
+    if (sectionId === 'chat') navs[3].classList.add('active');
+    if (sectionId === 'history') navs[4].classList.add('active');
+}
+</script>
+
+</body>
+</html>
