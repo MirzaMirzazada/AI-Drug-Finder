@@ -564,3 +564,13 @@ textarea {
         padding: 20px;
     }
 }
+
+.answer-box {
+    white-space: pre-line;
+    line-height: 1.8;
+    font-size: 16px;
+}
+
+.answer-box b {
+    color: #22c55e;
+}

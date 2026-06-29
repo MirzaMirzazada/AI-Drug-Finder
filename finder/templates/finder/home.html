@@ -77,12 +77,12 @@
                     <div class="num">02</div>
                     <div class="icon glow-green">📷</div>
                     <h2>PRESCRIPTION READER</h2>
-                    <p>Upload or capture prescription</p>
+                    <p>Upload prescription image</p>
 
                     <ul>
-                        <li>Upload or take a photo</li>
-                        <li>AI reads the handwriting</li>
-                        <li>Find possible medicines</li>
+                        <li>Upload doctor handwriting image</li>
+                        <li>OCR reads the prescription</li>
+                        <li>Shows detected text only</li>
                     </ul>
 
                     <button>Upload Prescription →</button>
@@ -96,7 +96,7 @@
 
                     <ul>
                         <li>Get info about medicines</li>
-                        <li>Uses AI for answers</li>
+                        <li>Uses local AI for answers</li>
                         <li>Fast and simple support</li>
                     </ul>
 
@@ -175,11 +175,11 @@
         <section id="prescription" class="section">
             <div class="module-card">
                 <h2>Prescription Reader</h2>
-                <p>Upload or take a photo of doctor handwriting.</p>
+                <p>Upload doctor prescription image. OCR will read and show detected text.</p>
 
                 <form method="POST" enctype="multipart/form-data">
                     {% csrf_token %}
-                    <input type="file" name="prescription" accept="image/*" capture="environment">
+                    <input type="file" name="prescription" accept="image/*">
                     <button type="submit" name="read_prescription">Read Prescription →</button>
                 </form>
 
@@ -257,24 +257,6 @@
         </section>
         {% endif %}
 
-        {% if prescription_results %}
-        <section class="results">
-            <h2>Medicines Found From Prescription</h2>
-            <div class="result-grid">
-                {% for drug in prescription_results %}
-                <div class="medicine-card">
-                    <img src="{% static 'finder/images/' %}{{ drug.image }}">
-                    <h3>{{ drug.name }}</h3>
-                    <p>Usage: {{ drug.usage }}</p>
-                    <p>Color: {{ drug.color }}</p>
-                    <p>Form: {{ drug.form }}</p>
-                    <span>Score: {{ drug.score }}</span>
-                </div>
-                {% endfor %}
-            </div>
-        </section>
-        {% endif %}
-
         <div class="warning">
             Important: This system gives suggestions only. Final decision always belongs to the pharmacist.
         </div>
@@ -307,12 +289,8 @@ function showSection(sectionId) {
 
 }
 
-
-// Automatically open the correct page after Django refreshes
 window.onload = function(){
-
     showSection("{{ active_tab|default:'dashboard' }}");
-
 }
 
 </script>
